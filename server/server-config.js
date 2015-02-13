@@ -1,21 +1,13 @@
-var express = require('express');
+var app = require('./server.js');
+// var express = require('express');
 var morgan = require('morgan');
+// var path = require('path');
 var mementosRouter = require('./mementos/mementos-router.js');
 var momentsRouter = require('./moments/moments-router.js');
-var app = express();
-
-app.set('port', process.env.PORT || 3000);
 
 // morgan is the request logger middleware for node
 app.use(morgan('combined'));
 
-
-app.listen(app.get('port'), function() {
-  'use strict';
-  console.log('Listening on port ' + app.get('port'));
-});
-
-// home page, this is temporary
 app.get('/', function(req, res) {
   'use strict';
   res.send('Hello Alan!');
