@@ -1,0 +1,23 @@
+{
+  "name": "mementos",
+  "version": "0.0.1",
+  "description": "Create and share moments as a narrative",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/supertitanoboa/mementos.git"
+  },
+  "keywords": [
+    "memento",
+    "moment",
+    "narrative"
+  ],
+  "author": "supertitanoboa",
+  "bugs": {
+    "url": "https://github.com/supertitanoboa/mementos/issues"
+  },
+  "homepage": "https://github.com/supertitanoboa/mementos"
+}
