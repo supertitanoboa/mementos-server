@@ -12,13 +12,13 @@ Connect the future with the present. Send moments to your loved ones to experien
 
 Documentation has been provided in several different places: 
 
-1. The [wiki](https://github.com/supertitanoboa/mementos/wiki)
+1. The [wiki](https://github.com/supertitanoboa/mementos-server/wiki)
 2. The highLevelInfrastructure text file in the root directory of the code
 3. Extensive commenting throughout the code itself
 
 ### Installing Dependencies & Build Process
 
-Please follow the steps outlined in the [Build Process Wiki](https://github.com/supertitanoboa/mementos/wiki/Build-Process).
+Please follow the steps outlined in the [Build Process Wiki](https://github.com/supertitanoboa/mementos-server/wiki/Build-Process).
 
 ## Contributing
 

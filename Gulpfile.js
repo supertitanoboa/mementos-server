@@ -7,30 +7,30 @@ var nodemon = require('gulp-nodemon');
 var mocha = require('gulp-mocha');
 
 // Lint Task
-gulp.task('lint', function() {
+gulp.task('lint', function(done) {
     'use strict';
     return gulp.src(['gulpfile.js', 'server/**/*.js'])
         .pipe(jshint())
-        .pipe(jshint.reporter('default'));
+        .pipe(jshint.reporter('default'), done);
 });
 
 
-gulp.task('mocha', function() {
+gulp.task('mocha', function(done) {
   'use strict';
   return gulp.src('tests/**/*.js')
-    .pipe(mocha({reporter: 'spec'}));
+    .pipe(mocha({reporter: 'spec'}), done);
 });
 
 
-gulp.task('nodemon', function() {
+gulp.task('nodemon', ['lint', 'test'], function() {
   'use strict';
   nodemon({
     script  : 'server/server.js',
     ext     : 'js',
-    ignore  : ['node_modules/*']
+    ignore  : ['node_modules/**/*']
   })
-  .on('start', ['watch'])
-  .on('change', ['watch']);
+    .on('start', ['watch'])
+    .on('change', ['watch']);
 });
 
 
@@ -41,9 +41,9 @@ gulp.task('test', ['mocha']);
 // Watch Files For Changes
 gulp.task('watch', function() {
   'use strict';
-  gulp.watch('server/*.js', ['lint']);
+  gulp.watch('server/**/*.js', ['lint']);
 });
 
 
 // Default Task
-gulp.task('default', ['lint', 'test', 'nodemon']);
+gulp.task('default', ['nodemon']);

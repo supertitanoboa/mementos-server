@@ -6,18 +6,18 @@ This workflow is based (nearly verbatim) on the workflow described [here](https:
 
 ### Local development
 
-1. Fork the central repo at [https://github.com/supertitanoboa/mementos](https://github.com/supertitanoboa/mementos)
+1. Fork the central repo at [https://github.com/supertitanoboa/mementos-server](https://github.com/supertitanoboa/mementos-server)
 
 1. Clone the forked repo to your local machine
 
     ```bash
-    $ git clone https://github.com/USERNAME/mementos.git
+    $ git clone https://github.com/USERNAME/mementos-server.git
     ```
 
 1. Configure the remotes by adding the central repository as 'upstream'
 
     ```bash
-    $ git remote add upstream https://github.com/supertitanoboa/mementos.git
+    $ git remote add upstream https://github.com/supertitanoboa/mementos-server.git
     ```
 
 1. Create a new branch for the feature you'd like to work on. Please try to name the branch as appropriately as possible (be terse, yet descriptive).
@@ -156,3 +156,34 @@ The feature you're working on is perfect, and the code you've written would make
 1. Once everything checks out, merge the pull request and keep on working!
 
 
+### Naming Branches
+
+When naming branches, it is important to consider the task at hand.  If you are creating a feature, it is fine to name the branch you are working on after that feature. For bug fixes, you should be prefixing your branch name with 'bug/'. This will ensure that we can go back to track any issues that have occurred throughout the project.
+
+So if you encounter a bug while working on branch 'your-sweet-new-branch', these are the steps to follow:
+
+1. Commit your current changes on 'your-sweet-new-branch'.
+
+1. Checkout a new branch with the name 'bug/your-sweet-new-branch':
+
+    ```bash
+    $ git checkout -b bug/your-sweet-new-branch
+    ``` 
+1. Fix the bugs on your newly created branch.  When the bugs / issues have been resolved, commit your changes on the 'bug/your-sweet-new-branch' branch and use the following to merge your changes back into 'your-sweet-new-branch':
+
+    ```bash
+    $ git checkout your-sweet-new-branch
+    $ git rebase bug/your-sweet-new-branch
+    ``` 
+
+1. You can now remove your old bug branch since the changes you made on the bug branch have been added back on to your feature branch.
+
+    ```bash
+    $ git branch -d bug/your-sweet-new-branch
+    ``` 
+
+Once you have completed any work on your branch, be sure to update the branch name to the new feature you will be working on.  You can easily rename a branch name with the following command:
+
+  ```bash
+  $ git branch -m <old-branch-name> <new-branch-name>
+  ```
