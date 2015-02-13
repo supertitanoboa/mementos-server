@@ -59,7 +59,7 @@ The feature you're working on is perfect, and the code you've written would make
 
     ```bash
     $ git checkout master
-    $ git pull upstream master
+    $ git rebase upstream/master
     ```
 
 1. Rebase **your-sweet-new-branch** on top of the upstream master
