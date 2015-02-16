@@ -7,4 +7,4 @@ deploy:
     secure: F5S4K+XudvElb8VJMuCP6xGRL38dTjE++LY7/BPz+I5vkiK+Q1lfLQMly0yNbpTWOSumKKW0GrfEYY+BInqQlOrIW+AKFiXRgw8mPOsF6RBvTpKtQ0BBEqcUZaDc5ALi2le3WgxdgFkaTolXWJCrzhBZdcZ8JOKTP+ry8szkSUs=
   app: mementosio
   on:
-    repo: supertitanoboa/mementos
+    repo: supertitanoboa/mementos-server
