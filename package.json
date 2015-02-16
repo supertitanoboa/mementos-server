@@ -2,6 +2,7 @@
   "name": "mementos",
   "version": "0.0.1",
   "description": "Create and share moments as a narrative",
+  "engine": "node 0.10.x",
   "main": "index.js",
   "scripts": {
     "test": "gulp test",
