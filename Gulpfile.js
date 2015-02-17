@@ -27,7 +27,7 @@ gulp.task('nodemon', function() {
   nodemon({
     script  : 'server/server.js',
     ext     : 'js',
-    ignore  : ['node_modules/*']
+    ignore  : ['node_modules/**/*']
   })
   .on('start', ['watch'])
   .on('change', ['watch']);
@@ -41,7 +41,7 @@ gulp.task('test', ['mocha']);
 // Watch Files For Changes
 gulp.task('watch', function() {
   'use strict';
-  gulp.watch('server/*.js', ['lint']);
+  gulp.watch('server/**/*.js', ['lint']);
 });
 
 

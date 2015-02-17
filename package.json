@@ -32,6 +32,7 @@
     "sinon": "^1.12.2"
   },
   "dependencies": {
-    "express": "^4.11.2"
+    "express": "^4.11.2",
+    "morgan": "^1.5.1"
   }
 }
