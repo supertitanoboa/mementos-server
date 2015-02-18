@@ -2,9 +2,9 @@ var express = require('express');
 var momentsRouter = express.Router();
 
 // save a moment
-momentsRouter.put('/', function(req, res) {
+momentsRouter.post('/', function(req, res) {
   'use strict';
-  res.send('this is the endpoint to which we will be saving moments');
+  res.status(201).send('this is the endpoint to which we will be saving moments');
 });
 
 module.exports = momentsRouter;
