@@ -6,12 +6,16 @@ var authRouter = require('./auth/auth-router.js');
 var apiRouter = require('./api/api-router.js');
 var app = express();
 
+var db = require('./database');
+
+app.set('db', db);
+
 app.set('port', process.env.PORT || 3000);
 
 // for parsing JSON
 app.use(bodyParser.json());
 
-/** express sessions come before passport session to ensure that login 
+/** express sessions come before passport session to ensure that login
  *  session is restored in the correct order
  */
 // app.use(express.session({ secret: 'keyboard cat' }));

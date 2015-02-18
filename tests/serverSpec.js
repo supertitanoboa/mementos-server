@@ -1,12 +1,12 @@
 var supertest = require('supertest');
 var chai = require('chai');
 var assert = chai.assert;
-var should = chai.should();
 var expect = chai.expect;
 var app = require('../server/app-config.js');
 var port = app.get('port');
 
-describe('Server Unit Tests', function() {  
+describe('Server Unit Tests', function() {
+  'use strict';
   it('server port should be a number', function(){
     expect(port).to.be.a('number');
     assert.typeOf(port, 'number');
@@ -89,4 +89,4 @@ describe('Server Unit Tests', function() {
 
 });
 
-
+app.get('db').destroy();
