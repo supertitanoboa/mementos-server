@@ -5,6 +5,7 @@ var gulp = require('gulp');
 var jshint = require('gulp-jshint');
 var nodemon = require('gulp-nodemon');
 var mocha = require('gulp-mocha');
+var shell = require('gulp-shell');
 
 // Lint Task
 gulp.task('lint', function(done) {
@@ -44,6 +45,22 @@ gulp.task('watch', function() {
   gulp.watch('server/**/*.js', ['lint']);
 });
 
+//create postgres server
+gulp.task('servercreate', shell.task([
+  'mkdir -p pgsql/data',
+  'initdb -D ./pgsql/data',
+  'postgres -D ./pgsql/data'
+]));
+
+gulp.task('serversetup', shell.task([
+  'createuser "user"',
+  'createdb test'
+]));
+
+//CAUTION: THIS IS AN RM -RF
+gulp.task('serverdelete', shell.task([
+  'rm -rf ./pgsql'
+]));
 
 // Default Task
 gulp.task('default', ['nodemon']);

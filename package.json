@@ -28,13 +28,17 @@
     "gulp-jshint": "^1.9.2",
     "gulp-mocha": "^2.0.0",
     "gulp-nodemon": "^1.0.5",
+    "gulp-shell": "^0.3.0",
     "http": "0.0.0",
     "mocha": "^2.1.0",
     "sinon": "^1.12.2",
     "supertest": "^0.15.0"
   },
   "dependencies": {
+    "bookshelf": "^0.7.9",
     "express": "^4.11.2",
-    "morgan": "^1.5.1"
+    "knex": "^0.7.3",
+    "morgan": "^1.5.1",
+    "pg": "^4.2.0"
   }
 }
