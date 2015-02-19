@@ -4,6 +4,10 @@ var mementosRouter = require('./mementos/mementos-router.js');
 var momentsRouter = require('./moments/moments-router.js');
 var app = express();
 
+var db = require('./database');
+
+app.set('db', db);
+
 app.set('port', process.env.PORT || 3000);
 
 // morgan is the request logger middleware for node
