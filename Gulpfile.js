@@ -9,19 +9,17 @@ var shell = require('gulp-shell');
 
 // Lint Task
 gulp.task('lint', function(done) {
-    'use strict';
-    return gulp.src(['gulpfile.js', 'server/**/*.js'])
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'), done);
+  'use strict';
+  return gulp.src(['gulpfile.js', 'server/**/*.js'])
+    .pipe(jshint())
+    .pipe(jshint.reporter('default'), done);
 });
-
 
 gulp.task('mocha', ['lint'], function(done) {
   'use strict';
   return gulp.src('tests/**/*.js')
     .pipe(mocha({reporter: 'spec'}), done);
 });
-
 
 gulp.task('nodemon', ['test'], function() {
   'use strict';
@@ -34,13 +32,11 @@ gulp.task('nodemon', ['test'], function() {
     .on('change', ['watch']);
 });
 
-
 //run tests
 gulp.task('test', ['mocha'], function(done) {
   'use strict';
   done();
 });
-
 
 // Watch Files For Changes
 gulp.task('watch', function() {
