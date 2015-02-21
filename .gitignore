@@ -29,3 +29,6 @@ node_modules
 
 #database directory
 pgsql
+
+# Local Environment Variables for Foreman
+local.env

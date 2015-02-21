@@ -1,6 +1,6 @@
 var express = require('express');
-var mementosRouter = require('../mementos/mementos-router.js');
-var momentsRouter = require('../moments/moments-router.js');
+var mementosRouter = require('./mementos/mementos-router.js');
+var momentsRouter = require('./moments/moments-router.js');
 var apiRouter = express.Router();
 
 // router for handling all requests to the /mementos endpoint

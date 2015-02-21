@@ -1,12 +1,15 @@
-var supertest = require('supertest');
 var chai = require('chai');
+var mocha = require('mocha');
 var assert = chai.assert;
 var expect = chai.expect;
 var app = require('../server/app-config.js');
+var supertest = require('supertest');
+// var Session = require('supertest-session')({app: app});
 var port = app.get('port');
 
 describe('Server Unit Tests', function() {
   'use strict';
+
   it('server port should be a number', function(){
     expect(port).to.be.a('number');
     assert.typeOf(port, 'number');
@@ -63,6 +66,14 @@ describe('Server Unit Tests', function() {
     });
   });
 
+  describe('GET /auth/signup', function(){
+    it('respond with 200 status code', function(done){
+      supertest(app)
+        .get('/auth/signup')
+        .expect(200, done);
+    });
+  });
+
   describe('POST /auth/signup', function(){
     xit('respond with 201 status code', function(done){
       supertest(app)
@@ -72,6 +83,14 @@ describe('Server Unit Tests', function() {
   });
 
   describe('GET /auth/login', function(){
+    it('respond with 200 status code', function(done){
+      supertest(app)
+        .get('/auth/login')
+        .expect(200, done);
+    });
+  });
+
+  describe('POST /auth/login', function(){
     xit('respond with 201 status code', function(done){
       supertest(app)
         .post('/auth/login')
@@ -87,6 +106,25 @@ describe('Server Unit Tests', function() {
     });
   });
 
+  describe('Redis Sessions', function(){
+    it('res.cookies should contain a sessionID', function(done){
+      supertest(app)
+        .get('/')
+        .expect('Set-Cookie', /sessionID/ , done);
+    });
+
+    it('res.cookies should contain a connect.sid', function(done){
+      supertest(app)
+        .get('/')
+        .expect('Set-Cookie', /connect.sid/ , done);
+    });
+  });
+
+  after(function() {
+    app.get('redis').redisOptions.client.quit();
+  });
+
 });
 
 app.get('db').destroy();
+

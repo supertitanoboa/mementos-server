@@ -18,3 +18,7 @@ env:
     dbuser="postgres"
     dbpassword=""
     dbname="travis_ci_test"
+services:
+  - redis-server
+after_script:
+  - kill $(pgrep redis)  
