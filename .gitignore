@@ -32,6 +32,11 @@ pgsql
 
 # Local Environment Variables for Foreman
 local.env
+.env
 
 #redis dump
 dump.rdb
+
+# Credentials for S3
+credentials.js
+

@@ -2,9 +2,10 @@ var chai = require('chai');
 var mocha = require('mocha');
 var assert = chai.assert;
 var expect = chai.expect;
+var should = chai.should();
 var app = require('../server/app-config.js');
+var aws = require('../server/aws/aws.js');
 var supertest = require('supertest');
-// var Session = require('supertest-session')({app: app});
 var port = app.get('port');
 
 after(function() {
@@ -123,6 +124,19 @@ describe('Server Unit Tests', function() {
         .get('/')
         .expect('Set-Cookie', /connect.sid/ , done);
     });
+  });
+
+  describe('AWS configuration', function() {
+    xit('aws.signedUrlAuth should be a function', function() {
+      assert.typeOf(aws.signedUrlAuth, 'function');
+    });
+
+    xit('node.env AWS credentials should exist (not applicable for dev environment)', function() {
+      should.exist(process.env.AWS_ACCESS_KEY_ID);
+      should.exist(process.env.AWS_SECRET_ACCESS_KEY);
+      should.exist(process.env.S3_BUCKET_NAME);
+    });
+    
   });
 
   after(function() {
