@@ -32,3 +32,6 @@ pgsql
 
 # Local Environment Variables for Foreman
 local.env
+
+#redis dump
+dump.rdb

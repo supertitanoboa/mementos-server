@@ -7,6 +7,11 @@ var supertest = require('supertest');
 // var Session = require('supertest-session')({app: app});
 var port = app.get('port');
 
+after(function() {
+  'use strict';
+  app.get('db').destroy();
+});
+
 describe('Server Unit Tests', function() {
   'use strict';
 
@@ -125,6 +130,3 @@ describe('Server Unit Tests', function() {
   });
 
 });
-
-app.get('db').destroy();
-
