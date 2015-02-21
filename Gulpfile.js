@@ -45,13 +45,13 @@ gulp.task('watch', function() {
 });
 
 //create postgres server
-gulp.task('servercreate', shell.task([
+gulp.task('serverinit', ['serverdelete'], shell.task([
   'mkdir -p pgsql/data',
   'initdb -D ./pgsql/data',
   'postgres -D ./pgsql/data'
 ]));
 
-gulp.task('serversetup', shell.task([
+gulp.task('serverconfig', shell.task([
   'createuser "user"',
   'createdb test'
 ]));
