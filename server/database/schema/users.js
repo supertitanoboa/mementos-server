@@ -23,8 +23,10 @@ var usersMaker = function usersMaker (bookshelf) {
   .then(function createUsersModel() {
     return new bPromise(function(resolve) {
       var User = bookshelf.Model.extend({
+
         tableName : config.tableName,
-        setPass : function (password) {
+
+        setPass : function setPass(password) {
           var _this = this;
           return new bPromise(function (resolve, reject) {
             bcrypt.hash(password, 10, function (err, hash) {
@@ -35,12 +37,21 @@ var usersMaker = function usersMaker (bookshelf) {
             });
           });
         },
-        changeEmail : function (email) {
+
+        changeEmail : function changeEmail(email) {
           if(require('valid-email')(email)) {
             this.set('email', email);
           } else {
             throw new Error('Error: Invalid Email.');
           }
+        },
+
+        validatePass : function validatePass(password) {
+          if(typeof password !== 'string' || !password) {
+            return false;
+          }
+
+          return bcrypt.compareSync(password, this.get('password'));
         }
       });
 
