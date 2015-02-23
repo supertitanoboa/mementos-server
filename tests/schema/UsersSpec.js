@@ -66,12 +66,41 @@ describe('User Tests', function() {
         knex.select().from('users').where({'email' : 'ab@cd.com'})
         .then(function(row) {
           expect(row.length).to.equal(1);
+          expect(row[0].email).to.equal('ab@cd.com');
           done();
         }).catch(function (err) {
           console.log('err', err);
           done();
         });
       });
+    });
+
+    describe('validatePass', function () {
+
+      var account;
+
+      beforeEach(function (done) {
+        account = new Users({
+          email: 'temp@test.com'
+        });
+        account.setPass('12345').then(function () {
+          done();
+        });
+      });
+
+      it('should return false when given no password', function () {
+        assert.isFalse(account.validatePass(), 'accepting no password as valid.');
+        assert.isFalse(account.validatePass(null), 'accepting null password as valid.');
+      });
+
+      it('should return true when given an invalid password', function () {
+        assert.isFalse(account.validatePass('123456'), 'accepting invalid password as valid.');
+      });
+
+      it('should return true when given a valid password', function () {
+        assert.isTrue(account.validatePass('12345'), 'rejecting valid password as invalid.');
+      });
+
     });
   });
 });
