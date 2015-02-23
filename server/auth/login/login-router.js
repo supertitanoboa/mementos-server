@@ -9,10 +9,27 @@ loginRouter.get('/', function(req, res) {
 
 // FIXME: needs proper response after successful authentication
 loginRouter.post('/', 
-  passport.authenticate('local'),
+  // TODO: Session handling
+  // passport.authenticate('local'),
   function(req, res) {
     'use strict';
-    res.status(201).send('user logged in');
+
+    var user     = new req.db.Users({ email: req.body.email});
+    var password = req.body.password; 
+
+    user.fetch()
+    .then(function(user) {
+      if (user) {
+        if (user.validatePass(password)) {
+          res.cookie('sessionID', req.sessionID);
+          res.status(201).send('User logged in');
+        } else {
+          res.status(400).send('Invalid username or password');
+        }
+      } else {
+        res.status(404).send('User not found');
+      }
+    })
   });
 
 module.exports = loginRouter;

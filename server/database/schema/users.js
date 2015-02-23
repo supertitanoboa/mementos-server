@@ -32,7 +32,7 @@ var usersMaker = function usersMaker (bookshelf) {
             bcrypt.hash(password, 10, function (err, hash) {
               if(err) { reject(err); } else {
                 _this.set('password', hash);
-                resolve(this);
+                resolve(_this);
               }
             });
           });
