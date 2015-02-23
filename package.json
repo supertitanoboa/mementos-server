@@ -30,7 +30,6 @@
     "gulp-mocha": "^2.0.0",
     "gulp-nodemon": "^1.0.5",
     "gulp-shell": "^0.3.0",
-    "http": "0.0.0",
     "mocha": "^2.1.0",
     "sinon": "^1.12.2",
     "supertest": "^0.15.0",
@@ -52,7 +51,6 @@
     "passport-local": "^1.0.0",
     "pg": "^4.2.0",
     "redis": "^0.12.1",
-    "url": "^0.10.2",
     "valid-email": "0.0.2"
   }
 }

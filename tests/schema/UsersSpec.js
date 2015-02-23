@@ -24,7 +24,7 @@ describe('User Tests', function() {
   beforeEach(function (done) {
     sandbox = sinon.sandbox.create();
 
-    require(usersPath)(bookshelf).then(function (model) {
+    require(usersPath)(db).then(function (model) {
       Users = model;
       done();
     });
@@ -53,14 +53,21 @@ describe('User Tests', function() {
       });
     });
 
+    after(function (done) {
+      Users.where({'email' : 'ab@cd.com'}).destroy()
+      .then(function() {
+        done();
+      });
+    });
+
     it('should add a User Object to the database', function (done) {
 
       var account = new Users({
         email: 'ab@cd.com'
       });
 
-      account.setPass('12345').then(function () {
-        return account.save();
+      account.setPass('12345').then(function (user) {
+        return user.save();
       })
       .then(function() {
         knex.select().from('users').where({'email' : 'ab@cd.com'})
@@ -69,8 +76,7 @@ describe('User Tests', function() {
           expect(row[0].email).to.equal('ab@cd.com');
           done();
         }).catch(function (err) {
-          console.log('err', err);
-          done();
+          done(err);
         });
       });
     });

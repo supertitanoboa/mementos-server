@@ -6,5 +6,6 @@ module.exports = {
     password : process.env.dbpassword || '',
     database : process.env.dbname || 'test',
     charset  : 'utf8'
-  }
+  },
+  // debug : true
 };

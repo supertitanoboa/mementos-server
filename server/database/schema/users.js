@@ -1,8 +1,10 @@
 var bPromise = require('bluebird');
 var bcrypt = require('bcrypt');
 
-var usersMaker = function usersMaker (bookshelf) {
+var usersMaker = function usersMaker (db) {
   'use strict';
+
+  var bookshelf = db.bookshelf;
   var knex = bookshelf.knex;
 
   var config = {
