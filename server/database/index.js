@@ -1,5 +1,4 @@
 var db = require('./dbConfig');
-var bookshelf = db.bookshelf;
 
 var models = {
   Users : 'users.js',
@@ -18,7 +17,7 @@ var attacherMaker = function attacherMaker (key) {
 
 for(var key in models) {
   if(models.hasOwnProperty(key)) {
-    require('./schema/' + models[key])(bookshelf)
+    require('./schema/' + models[key])(db)
     .then(attacherMaker(key));
   }
 }
