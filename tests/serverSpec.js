@@ -4,6 +4,7 @@ var assert = chai.assert;
 var expect = chai.expect;
 var should = chai.should();
 var app = require('../server/app-config.js');
+var apiRouter = require('../server/api/api-router.js');
 var aws = require('../server/aws/aws.js');
 var supertest = require('supertest');
 var port = app.get('port');
@@ -32,43 +33,43 @@ describe('Server Unit Tests', function() {
     });
   });
 
-  describe('GET /mementos', function(){
-    it('respond with 200 status code', function(done){
+  describe('GET /mementos without session authentication', function(){
+    it('respond with 403 status code', function(done){
       supertest(app)
         .get('/api/1/mementos')
-        .expect(200, done);
+        .expect(403, done);
     });
   });
 
-  describe('POST /mementos', function(){
-    it('respond with 201 status code', function(done){
+  describe('POST /mementos without session authentication', function(){
+    it('respond with 403 status code', function(done){
       supertest(app)
         .post('/api/1/mementos')
-        .expect(201, done);
+        .expect(403, done);
     });
   });
 
-  describe('GET /mementos/:id', function(){
-    it('respond with 200 status code', function(done){
+  describe('GET /mementos/:id without session authentication', function(){
+    it('respond with 403 status code', function(done){
       supertest(app)
         .get('/api/1/mementos/:id')
-        .expect(200, done);
+        .expect(403, done);
     });
   });
 
-  describe('PUT /mementos/:id', function(){
-    it('respond with 201 status code', function(done){
+  describe('PUT /mementos/:id without session authentication', function(){
+    it('respond with 403 status code', function(done){
       supertest(app)
         .put('/api/1/mementos/:id')
-        .expect(201, done);
+        .expect(403, done);
     });
   });
 
-  describe('POST /moments', function(){
-    it('respond with 201 status code', function(done){
+  describe('POST /moments without session authentication', function(){
+    it('respond with 403 status code', function(done){
       supertest(app)
         .post('/api/1/moments')
-        .expect(201, done);
+        .expect(403, done);
     });
   });
 

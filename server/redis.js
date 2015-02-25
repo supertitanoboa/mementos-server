@@ -33,7 +33,7 @@ redisCloud.redisOptions.client.hkeys('hash key', function (err, replies) {
   'use strict';
   console.log(replies.length + ' replies:');
   replies.forEach(function (reply, i) {
-      console.log('    ' + i + ': ' + reply);
+    console.log('    ' + i + ': ' + reply);
   });
 });
 

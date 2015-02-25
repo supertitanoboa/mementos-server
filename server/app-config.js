@@ -4,7 +4,6 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var cors = require('cors');
 var redis = require('./redis.js');
-var passport = require('./passport.js');
 var authRouter = require('./auth/auth-router.js');
 var apiRouter = require('./api/api-router.js');
 var s3Router = require('./aws/aws.js').s3Router;
@@ -23,22 +22,16 @@ app.use(cors());
 app.use(function (req, res, next) {
   'use strict';
   req.db = db;
+  req.redis = redis;
   next();
 });
 
-// express sessions come before passport session to ensure that login session is restored in the correct order
 app.use(redis.session({
   store: new redis.RedisStore(redis.redisOptions),
   secret: 'keyboard cat',
   resave: true,
   saveUninitialized: true
 }));
-
-// middleware required to initialize Passport.
-app.use(passport.initialize());
-
-// middleware for persistent login sessions
-app.use(passport.session());
 
 // FIXME: home page, this is temporary
 app.get('/', function(req, res) {
@@ -57,7 +50,7 @@ app.use('/api', apiRouter);
 // router for handling all requests to the /auth endpoint
 app.use('/auth', authRouter);
 
-// router for handling all requests to the /auth endpoint
+// router for handling all requests to the /s3 endpoint
 app.use('/s3', s3Router);
 
 module.exports = app;
