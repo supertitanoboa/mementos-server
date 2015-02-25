@@ -1,24 +1,31 @@
-language: node_js
-node_js:
-- '0.10'
+---
+addons:
+  postgresql: "9.3"
+after_script:
+  - "kill $(pgrep redis)"
+before_script:
+  - "psql -c 'create database travis_ci_test;' -U postgres"
 deploy:
-  provider: heroku
   api_key:
     secure: F5S4K+XudvElb8VJMuCP6xGRL38dTjE++LY7/BPz+I5vkiK+Q1lfLQMly0yNbpTWOSumKKW0GrfEYY+BInqQlOrIW+AKFiXRgw8mPOsF6RBvTpKtQ0BBEqcUZaDc5ALi2le3WgxdgFkaTolXWJCrzhBZdcZ8JOKTP+ry8szkSUs=
   app: mementosio
-  on:
+  provider: heroku
+  true:
     repo: supertitanoboa/mementos-server
-addons:
-  postgresql: "9.3"
-before_script:
-  - psql -c 'create database travis_ci_test;' -U postgres
 env:
   global:
-    dbhost="127.0.0.1"
-    dbuser="postgres"
-    dbpassword=""
-    dbname="travis_ci_test"
+    dbhost: "127.0.0.1"
+    dbname: travis_ci_test
+    dbpassword: ~
+    dbuser: postgres
+    AWS_ACCESS_KEY_ID:
+      secure: ZV0fG1ch1A+YQzZc3yDr5Ne766op7vXheoMEpjS8PhBERq7qMCMMbOJDj0WtMZopjoj2jCAy7+YESB9qCXFmLCHSmS5PtZ7gS+3/P46XvYhV9r3l58mQ93F7yULFZQwsKV1Vvb6XzLYGu/UrDULcjOqTwbP9kV+LbDqStZycLgM=
+    AWS_SECRET_ACCESS_KEY:
+      secure: GWgS+FqQcJdWbiB7TGazOKg+H4DDIfP/JMKaw7gg8MdFKwbuwJQUbIaae2ZeQOTMZ2bQmbPnYlGYPvfjJQ8l0YejNcQBSpBJIU0y+b2dVEHAIJ3KKIIRFgmiquyXVSFa6ECBqqoPRNMrlYouX9s6vRLzsUN2Xbj5wNRn5lb3MUo=
+    S3_BUCKET_NAME:
+      secure: A885lK03W63uEYdokDqefEQBH+XOJdWFKJjn5EJ1eIr3K3NNJukPPkcvd9ECOeZ70vdRQI66TyJ10akZMOGC/Z4tWh295Y7MACwF11uPirlIiF0QG5mIV292HjJN84zOOu2RQpo10W/WJz2VrEOxjOlDhuUxV66slgFdVPYtbRk=
+language: node_js
+node_js:
+  - "0.10"
 services:
   - redis-server
-after_script:
-  - kill $(pgrep redis)  

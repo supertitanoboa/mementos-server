@@ -18,9 +18,9 @@ loginRouter.post('/',
     var password = req.body.password; 
 
     user.fetch()
-    .then(function(user) {
-      if (user) {
-        if (user.validatePass(password)) {
+    .then(function(dbUser) {
+      if (dbUser) {
+        if (dbUser.validatePass(password)) {
           res.cookie('sessionID', req.sessionID);
           res.status(201).send('User logged in');
         } else {
@@ -29,7 +29,7 @@ loginRouter.post('/',
       } else {
         res.status(404).send('User not found');
       }
-    })
+    });
   });
 
 module.exports = loginRouter;

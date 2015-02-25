@@ -1,5 +1,4 @@
 var express = require('express');
-var passport = require('../../passport.js');
 var signupRouter = express.Router();
 // var db = app.get('db');
 
@@ -21,10 +20,10 @@ signupRouter.post('/',
     .then(function(model) {
       if (!model) {        
         user.setPass(req.body.password)
-        .then(function(user) {
-          return user.save()
+        .then(function(dbUser) {
+          return dbUser.save();
         })
-        .then(function(model) {                    
+        .then(function(savedUser) {
           res.cookie('sessionID', req.sessionID);
           res.status(201).send('User created!');
         });
