@@ -5,6 +5,7 @@ var momentsRouter = express.Router();
 // save a moment
 momentsRouter.post('/', function(req, res) {
   'use strict';
+  console.log('req.body', req.body);
   res.status(201).send({momentID: 5});
 });
 

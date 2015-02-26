@@ -1,5 +1,4 @@
 var express = require('express');
-var passport = require('../../passport.js');
 var loginRouter = express.Router();
 
 loginRouter.get('/', function(req, res) {
@@ -10,19 +9,17 @@ loginRouter.get('/', function(req, res) {
 // FIXME: needs proper response after successful authentication
 loginRouter.post('/', 
   // TODO: Session handling
-  // passport.authenticate('local'),
   function(req, res) {
     'use strict';
-
-    var user     = new req.db.Users({ email: req.body.email});
-    var password = req.body.password; 
-
+    var user     = new req.db.Users({ email: req.body.email });
+    var password = req.body.password;
     user.fetch()
     .then(function(dbUser) {
       if (dbUser) {
         if (dbUser.validatePass(password)) {
-          res.cookie('sessionID', req.sessionID);
-          res.status(201).send('User logged in');
+          // set sessionID and user id in redis cache
+          req.redis.redisOptions.client.set(req.sessionID, dbUser.get('id'));
+          res.status(201).send(req.sessionID);  
         } else {
           res.status(400).send('Invalid username or password');
         }

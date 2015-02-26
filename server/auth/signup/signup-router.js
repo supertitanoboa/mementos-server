@@ -10,27 +10,24 @@ signupRouter.get('/', function(req, res) {
 });   
 
 // FIXME: needs proper response after successful authentication
-signupRouter.post('/', 
-  // passport.authenticate('local'),
-  function(req, res) {
-    'use strict';
-    var user = new req.db.Users({email: req.body.email});
-
-    user.fetch()
-    .then(function(model) {
-      if (!model) {        
-        user.setPass(req.body.password)
-        .then(function(dbUser) {
-          return dbUser.save();
-        })
-        .then(function(savedUser) {
-          res.cookie('sessionID', req.sessionID);
-          res.status(201).send('User created!');
-        });
-      } else {
-        res.status(409).send('User Already Exists.');
-      }
-    });
-  }); 
+signupRouter.post('/', function(req, res) {
+  'use strict';
+  var user = new req.db.Users({email: req.body.email});
+  user.fetch()
+  .then(function(model) {
+    if (!model) {        
+      user.setPass(req.body.password)
+      .then(function(dbUser) {
+        return dbUser.save();
+      })
+      .then(function(savedUser) {
+        req.redis.redisOptions.client.set(req.sessionID, savedUser.get('id'));
+        res.status(201).send(req.sessionID);
+      });
+    } else {
+      res.status(409).send('User Already Exists.');
+    }
+  });
+}); 
 
 module.exports = signupRouter;
