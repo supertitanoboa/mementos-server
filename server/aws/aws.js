@@ -44,7 +44,7 @@ aws.s3Router.get('*', function(req, res){
       res.end();
     }
   });
-  
+
 });
 
 module.exports = aws;
