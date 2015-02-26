@@ -137,7 +137,7 @@ describe('Server Unit Tests', function() {
       should.exist(process.env.AWS_SECRET_ACCESS_KEY);
       should.exist(process.env.S3_BUCKET_NAME);
     });
-    
+
   });
 
   after(function() {

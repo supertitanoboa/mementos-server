@@ -1,24 +1,14 @@
 var db = require('./dbConfig');
+var models;
+var key;
 
-var models = {
-  Users : 'users.js',
-  // UserProfiles : 'userprofiles.js',
-  // Mementos : 'mementos.js',
-  // Moments : 'moments.js'
-};
+require('./schema.js')(db);
 
+models = require('./models.js')(db);
 
-var attacherMaker = function attacherMaker (key) {
-  'use strict';
-  return function modelAttacher (model) {
-    db[key] = model;
-  };
-};
-
-for(var key in models) {
+for(key in models) {
   if(models.hasOwnProperty(key)) {
-    require('./schema/' + models[key])(db)
-    .then(attacherMaker(key));
+    db[key] = models[key];
   }
 }
 
