@@ -22,7 +22,7 @@ var schemaBuilder = function schemaBuilder (db) {
           table.string('title', 254).notNullable();
           table.bigInteger('owner_id').unsigned().notNullable().references('id').inTable('users');
           table.boolean('public').defaultTo(false);
-          table.enu('release_type', ['default', 'allAtOnce']).defaultTo('default');
+          table.string('release_type').defaultTo('default');
         });
       }
     });
