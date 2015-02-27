@@ -17,6 +17,8 @@ var modelsBuilder = function modelsBuilder (db) {
 
     tableName : 'users',
 
+    hasTimestamps: ['created_at', 'updated_at'],
+
     setPass : function setPass(password) {
       var _this = this;
       return new bPromise(function (resolve, reject) {
@@ -93,6 +95,8 @@ var modelsBuilder = function modelsBuilder (db) {
   models.Mementos = Mementos = bookshelf.Model.extend({
 
     tableName : 'mementos',
+
+    hasTimestamps: ['created_at', 'updated_at'],
 
     owner : function owner () {
       return this.belongsTo(Users, 'owner_id');
@@ -184,7 +188,7 @@ var modelsBuilder = function modelsBuilder (db) {
         owner : this.get('owner_id'),
         options : {
           public : this.get('public'),
-          releaseType : this.get('release_type')
+          releaseType : new Date(this.get('release_type')).getTime()
         }
       };
     }
@@ -192,12 +196,16 @@ var modelsBuilder = function modelsBuilder (db) {
   });
 
   models.Pebbles = Pebbles = bookshelf.Model.extend({
-    tableName : 'pebbles'
+    tableName : 'pebbles',
+
+    hasTimestamps: ['created_at', 'updated_at'],
   });
 
   models.Moments = Moments = bookshelf.Model.extend({
 
     tableName : 'moments',
+
+    hasTimestamps: ['created_at', 'updated_at'],
 
     author : function author () {
       return this.belongsTo(Users, 'author_id');
