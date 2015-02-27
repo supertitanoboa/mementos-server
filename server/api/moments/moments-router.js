@@ -10,7 +10,7 @@ momentsRouter.post('/', function(req, res) {
     title : req.body.title,
     author_id : req.userID,
     ordering : req.body.ordering,
-    release_date : req.body.releaseDate,
+    release_date : Date(req.body.releaseDate).slice(0,31),
     longitude : req.body.meta.location.longitude,
     latitude : req.body.meta.location.latitude,
     location : req.body.meta.location.place

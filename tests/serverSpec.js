@@ -1,18 +1,11 @@
 var chai = require('chai');
-var mocha = require('mocha');
 var assert = chai.assert;
 var expect = chai.expect;
 var should = chai.should();
 var app = require('../server/app-config.js');
-var apiRouter = require('../server/api/api-router.js');
 var aws = require('../server/aws/aws.js');
 var supertest = require('supertest');
 var port = app.get('port');
-
-after(function() {
-  'use strict';
-  app.get('db').destroy();
-});
 
 describe('Server Unit Tests', function() {
   'use strict';
@@ -140,8 +133,17 @@ describe('Server Unit Tests', function() {
 
   });
 
-  after(function() {
-    app.get('redis').redisOptions.client.quit();
-  });
+});
 
+after(function(done) {
+  'use strict';
+  app.get('redis').redisOptions.client.quit();
+
+  //db connection is trying to be torn down too quickly.
+  setTimeout(function () {
+    app.get('db').destroy()
+    .then(function () {
+      done();
+    });
+  }, 200);
 });

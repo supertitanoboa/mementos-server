@@ -9,6 +9,7 @@ var schemaBuilder = function schemaBuilder (db) {
         table.bigIncrements('id').primary();
         table.string('password', 254).notNullable();
         table.string('email', 150).unique().notNullable().index();
+        table.timestamps();
       });
     }
   })
@@ -23,6 +24,7 @@ var schemaBuilder = function schemaBuilder (db) {
           table.bigInteger('owner_id').unsigned().notNullable().references('id').inTable('users');
           table.boolean('public').defaultTo(false);
           table.string('release_type').defaultTo('default');
+          table.timestamps();
         });
       }
     });
@@ -67,7 +69,7 @@ var schemaBuilder = function schemaBuilder (db) {
           table.float('longitude').nullable();
           table.float('latitude').nullable();
           table.string('location', 254).nullable();
-          table.bigInteger('release_date').notNullable();
+          table.dateTime('release_date').notNullable();
           table.timestamps();
         });
       }
