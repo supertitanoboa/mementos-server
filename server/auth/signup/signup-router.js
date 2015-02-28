@@ -22,7 +22,7 @@ signupRouter.post('/', function(req, res) {
       })
       .then(function(savedUser) {
         req.redis.redisOptions.client.set(req.sessionID, savedUser.get('id'));
-        res.status(201).send(req.sessionID);
+        res.status(201).send({sessionID: req.sessionID, userID: savedUser.get('id')});
       });
     } else {
       res.status(409).send('User Already Exists.');

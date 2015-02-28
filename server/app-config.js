@@ -10,6 +10,8 @@ var s3Router = require('./aws/aws.js').s3Router;
 var db = require('./database');
 var app = express();
 
+console.log('process.pid', process.pid);
+
 app.set('db', db);
 app.set('redis', redis);
 app.set('port', process.env.PORT || 3000);
