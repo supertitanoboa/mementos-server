@@ -145,15 +145,20 @@ mementosRouter.put('/:id', function(req, res) {
       if(isAuthor) {
         db.Moments.where({id: momentID})
         .fetch().then(function (moment) {
-          moment.set('memento_id', mementoID);
-          moment.save()
-          .then(function () {
-            res.status(201).send('save successful');
-          })
-          .catch(function (err) {
-            console.log('PUT /api/1/mementos/:id ERROR1:', err);
-            res.status(500).send('error adding moment to memento.');
-          });
+          // moment not found with the momentID
+          if (moment === null) {
+            res.status(404).send('No moment found with that moment ID');
+          } else {
+            moment.set('memento_id', mementoID);
+            moment.save()
+            .then(function () {
+              res.status(201).send('save successful');
+            });
+          }
+        })
+        .catch(function (err) {
+          console.log('PUT /api/1/mementos/:id ERROR1:', err);
+          res.status(500).send('error adding moment to memento.');
         });
       } else {
         res.status(403).send('Unauthorized request');
