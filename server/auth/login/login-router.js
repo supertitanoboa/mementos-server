@@ -19,7 +19,7 @@ loginRouter.post('/',
         if (dbUser.validatePass(password)) {
           // set sessionID and user id in redis cache
           req.redis.redisOptions.client.set(req.sessionID, dbUser.get('id'));
-          res.status(201).send(req.sessionID);  
+          res.status(201).send({sessionID: req.sessionID, userID: dbUser.get('id')});
         } else {
           res.status(400).send('Invalid username or password');
         }
