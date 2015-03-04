@@ -85,9 +85,11 @@ mementosRouter.post('/', function(req, res) {
       },recipients)
       .then(function (mementoID) {
         db.Moments.where({id : momentID}).fetch().then(function (moment) {
-          moment.set('memento_id', mementoID).save().then(function () {
-            res.status(201).send(mementoID);
-          });
+          if(moment) {
+            moment.set('memento_id', mementoID).save().then(function () {
+              res.status(201).send(mementoID);
+            });
+          }
         });
       })
       .catch(function (err) {
