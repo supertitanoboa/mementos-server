@@ -111,40 +111,44 @@ mementosRouter.get('/:id/:userType', function(req, res) {
   db.Mementos.where({id : mementoID})
   .fetch({withRelated : ['moments']}).then(function (fetchedMemento) {
     memento = fetchedMemento;
+    console.log('memento', memento);
     return new bPromise(function (resolve) {
       var response = memento.formatJSON();
       var unfinishedMoments = memento.related('moments').length;
       response.moments = [];
 
-      memento.related('moments').forEach(function (moment) {
-        var formattedMoment = moment.formatJSON();
-        var releaseDateValue = new Date(formattedMoment.releaseDate).valueOf();
-        if(userType === 'author' || (userType === 'recipient' && releaseDateValue <= Date.now().valueOf())) {
-          formattedMoment.content = [];
-          moment.related('pebbles').fetch()
-          .then(function (pebbles) {
-            pebbles.forEach(function (pebble) {
-              formattedMoment.content.push({
-                type : pebble.get('type'),
-                url : pebble.get('url'),
-                order : pebble.get('order')
+      if(memento.related('moments').length === 0) {
+        resolve(response);
+      } else {
+        memento.related('moments').forEach(function (moment) {
+          var formattedMoment = moment.formatJSON();
+          var releaseDateValue = new Date(formattedMoment.releaseDate).valueOf();
+          if(userType === 'author' || (userType === 'recipient' && releaseDateValue <= Date.now().valueOf())) {
+            formattedMoment.content = [];
+            moment.related('pebbles').fetch()
+            .then(function (pebbles) {
+              pebbles.forEach(function (pebble) {
+                formattedMoment.content.push({
+                  type : pebble.get('type'),
+                  url : pebble.get('url'),
+                  order : pebble.get('order')
+                });
               });
-            });
 
-            response.moments.push(formattedMoment);
+              response.moments.push(formattedMoment);
+              unfinishedMoments--;
+              if(unfinishedMoments === 0) {
+                resolve(response);
+              }
+            });
+          } else {
             unfinishedMoments--;
             if(unfinishedMoments === 0) {
               resolve(response);
             }
-          });
-        } else {
-          unfinishedMoments--;
-          if(unfinishedMoments === 0) {
-            resolve(response);
           }
-        }
-      });
-
+        });
+      }
     });
   })
 
@@ -165,6 +169,11 @@ mementosRouter.get('/:id/:userType', function(req, res) {
         });
       }
     });
+  })
+
+  .catch(function (err) {
+    console.log('GET /api/1/mementos/:id/:userType', err);
+    res.status(500).send('Failed to access Memento');
   });
 });
 
