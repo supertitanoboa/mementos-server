@@ -12,6 +12,7 @@ mementosRouter.use(function (req, res, next) {
 // retrieve all memento metadata associated with a specific user
 mementosRouter.get('/', function(req, res) {
   'use strict';
+
   db.Users.where({id : req.userID})
   .fetch({withRelated : ['mementosAuthored', 'mementosReceived']})
   .then(function (user) {
@@ -24,26 +25,30 @@ mementosRouter.get('/', function(req, res) {
 
     new bPromise(function(resolve) {
       var unfinishedMementos = user.related('mementosReceived').length;
-      user.related('mementosReceived').forEach(function (memento) {
-        memento.fetch({withRelated: ['moments']})
-        .then(function (memento2) {
-          var moments = memento2.related('moments').models;
-          var index;
-          if(moments) {
-            for(index = 0; index < moments.length; index++) {
-              if(moments[index].get('release_date').valueOf() <= Date.now().valueOf()) {
-                received.push(memento.formatJSON());
-                break;
+      if(unfinishedMementos === 0) {
+        resolve();
+      } else {
+        user.related('mementosReceived').forEach(function (memento) {
+          memento.fetch({withRelated: ['moments']})
+          .then(function (memento2) {
+            var moments = memento2.related('moments').models;
+            var index;
+            if(moments) {
+              for(index = 0; index < moments.length; index++) {
+                if(moments[index].get('release_date').valueOf() <= Date.now().valueOf()) {
+                  received.push(memento.formatJSON());
+                  break;
+                }
               }
             }
-          }
 
-          unfinishedMementos--;
-          if(unfinishedMementos === 0) {
-            resolve();
-          }
+            unfinishedMementos--;
+            if(unfinishedMementos === 0) {
+              resolve();
+            }
+          });
         });
-      });
+      }
     }).then(function() {
       var mementos = {
         created : authored,
