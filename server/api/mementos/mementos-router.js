@@ -22,16 +22,36 @@ mementosRouter.get('/', function(req, res) {
       authored.push(memento.formatJSON());
     });
 
-    user.related('mementosReceived').forEach(function (memento) {
-      received.push(memento.formatJSON());
+    new bPromise(function(resolve) {
+      var unfinishedMementos = user.related('mementosReceived').length;
+      user.related('mementosReceived').forEach(function (memento) {
+        memento.fetch({withRelated: ['moments']})
+        .then(function (memento2) {
+          var moments = memento2.related('moments').models;
+          var index;
+          if(moments) {
+            for(index = 0; index < moments.length; index++) {
+              if(moments[index].get('release_date').valueOf() <= Date.now().valueOf()) {
+                received.push(memento.formatJSON());
+                break;
+              }
+            }
+          }
+
+          unfinishedMementos--;
+          if(unfinishedMementos === 0) {
+            resolve();
+          }
+        });
+      });
+    }).then(function() {
+      var mementos = {
+        created : authored,
+        received : received
+      };
+
+      res.status(200).send(mementos);
     });
-
-    var mementos = {
-      created : authored,
-      received : received
-    };
-
-    res.status(200).send(mementos);
   });
 });
 
@@ -74,9 +94,10 @@ mementosRouter.post('/', function(req, res) {
 });
 
 // retrieve all of the data for a specific memento
-mementosRouter.get('/:id', function(req, res) {
+mementosRouter.get('/:id/:userType', function(req, res) {
   'use strict';
 
+  var userType = req.params.userType;
   var mementoID = req.params.id;
   var memento;
 
@@ -90,29 +111,38 @@ mementosRouter.get('/:id', function(req, res) {
 
       memento.related('moments').forEach(function (moment) {
         var formattedMoment = moment.formatJSON();
-        formattedMoment.content = [];
-        moment.related('pebbles').fetch()
-        .then(function (pebbles) {
-          pebbles.forEach(function (pebble) {
-            formattedMoment.content.push({
-              type : pebble.get('type'),
-              url : pebble.get('url'),
-              order : pebble.get('order')
+        var releaseDateValue = new Date(formattedMoment.releaseDate).valueOf();
+        if(userType === 'author' || (userType === 'recipient' && releaseDateValue <= Date.now().valueOf())) {
+          formattedMoment.content = [];
+          moment.related('pebbles').fetch()
+          .then(function (pebbles) {
+            pebbles.forEach(function (pebble) {
+              formattedMoment.content.push({
+                type : pebble.get('type'),
+                url : pebble.get('url'),
+                order : pebble.get('order')
+              });
             });
-          });
 
-          response.moments.push(formattedMoment);
+            response.moments.push(formattedMoment);
+            unfinishedMoments--;
+            if(unfinishedMoments === 0) {
+              resolve(response);
+            }
+          });
+        } else {
           unfinishedMoments--;
           if(unfinishedMoments === 0) {
             resolve(response);
           }
-        });
+        }
       });
 
     });
   })
 
   .then(function (response) {
+    console.log('returning ', response);
     memento.hasAuthor(req.userID)
     .then(function (isAuthor) {
       if(isAuthor) {
