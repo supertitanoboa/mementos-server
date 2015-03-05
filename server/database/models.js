@@ -188,7 +188,7 @@ var modelsBuilder = function modelsBuilder (db) {
         owner : this.get('owner_id'),
         options : {
           public : this.get('public'),
-          releaseType : new Date(this.get('release_type')).getTime()
+          releaseType : this.get('release_type')
         }
       };
     }

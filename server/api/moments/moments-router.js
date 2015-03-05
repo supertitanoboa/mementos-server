@@ -1,39 +1,37 @@
 var express = require('express');
 var aws = require('../../aws/aws.js');
+var async = require('async');
 var momentsRouter = express.Router();
+var db;
 
 // save a moment
 momentsRouter.post('/', function(req, res) {
   'use strict';
-  console.log('req.body', req.body);
-  new req.db.Moments({
+  var momentData = req.body;
+  var pebbles = momentData.content;
+  db = req.db;
+
+  new db.Moments({
     title : req.body.title,
     author_id : req.userID,
-    ordering : req.body.ordering,
-    release_date : Date(req.body.releaseDate).slice(0,31),
-    longitude : req.body.meta.location.longitude,
-    latitude : req.body.meta.location.latitude,
-    location : req.body.meta.location.place
+    ordering : momentData.ordering,
+    release_date : Date(momentData.releaseDate).slice(0,31),
+    longitude : momentData.meta.location.longitude,
+    latitude : momentData.meta.location.latitude,
+    location : momentData.meta.location.place
   }).save()
+
   .then(function (moment) {
-    var index;
-    var pebble;
     var counter = 1;
-    var numPebbles = req.body.content.length;
-    var unfinishedPebbles = numPebbles;
-
-    var checkFinished = function checkFinished () {
-      unfinishedPebbles--;
-      if(unfinishedPebbles === 0) {
-        res.status(201).send(moment.get('id'));
-      }
-    };
-
-    for(index = 0; index < numPebbles; index++) {
-      pebble = req.body.content[index];
+    async.each(pebbles, function (pebble, done) {
       moment.addPebble(pebble.type, pebble.url, counter++)
-      .then(checkFinished);
-    }
+      .then(function () {
+        done();
+      });
+    },
+    function () {
+      res.status(201).send(moment.get('id'));
+    });
   })
   .catch(function (err) {
     console.log('POST /moments ERROR:', err);
