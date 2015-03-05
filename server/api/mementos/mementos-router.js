@@ -1,6 +1,6 @@
 var express = require('express');
+var async = require('async');
 var mementosRouter = express.Router();
-var bPromise = require('bluebird');
 var db;
 
 mementosRouter.use(function (req, res, next) {
@@ -12,51 +12,46 @@ mementosRouter.use(function (req, res, next) {
 // retrieve all memento metadata associated with a specific user
 mementosRouter.get('/', function(req, res) {
   'use strict';
+  var authored = [];
+  var received = [];
+  var mementos = {
+    created : authored,
+    received : received
+  };
+
+  var checkReceivedMementos = function checkReceivedMementos (memento, done) {
+    memento.fetch({withRelated: ['moments']})
+    .then(function checkMoments(memento2) {
+      var moments = memento2.related('moments');
+      var added = false;
+
+      if(moments) {
+        moments.forEach(function compareMomentReleaseDate(moment) {
+          if(!added && moment.get('release_date').valueOf() <= Date.now().valueOf()) {
+            received.push(memento.formatJSON());
+            added = true;
+          }
+        });
+      }
+
+      done();
+    });
+  };
 
   db.Users.where({id : req.userID})
   .fetch({withRelated : ['mementosAuthored', 'mementosReceived']})
   .then(function (user) {
-    var authored = [];
-    var received = [];
-
-    user.related('mementosAuthored').forEach(function (memento) {
-      authored.push(memento.formatJSON());
-    });
-
-    new bPromise(function(resolve) {
-      var unfinishedMementos = user.related('mementosReceived').length;
-      if(unfinishedMementos === 0) {
-        resolve();
-      } else {
-        user.related('mementosReceived').forEach(function (memento) {
-          memento.fetch({withRelated: ['moments']})
-          .then(function (memento2) {
-            var moments = memento2.related('moments').models;
-            var index;
-            if(moments) {
-              for(index = 0; index < moments.length; index++) {
-                if(moments[index].get('release_date').valueOf() <= Date.now().valueOf()) {
-                  received.push(memento.formatJSON());
-                  break;
-                }
-              }
-            }
-
-            unfinishedMementos--;
-            if(unfinishedMementos === 0) {
-              resolve();
-            }
-          });
-        });
-      }
-    }).then(function() {
-      var mementos = {
-        created : authored,
-        received : received
-      };
+    async.each(user.related('mementosReceived'), checkReceivedMementos, function sendResponse() {
+      user.related('mementosAuthored').forEach(function (memento) {
+        authored.push(memento.formatJSON());
+      });
 
       res.status(200).send(mementos);
     });
+  })
+  .catch(function (err) {
+    console.log('GET /api/1/mementos ERROR:', err);
+    res.status(500).send('Error retrieving user mementos.');
   });
 });
 
@@ -66,6 +61,8 @@ mementosRouter.post('/', function(req, res) {
 
   var memento = req.body;
   var momentID = memento.moments[0];
+  var user;
+  var recipients;
   var counter;
 
   var makeQuery = function makeQuery (q) {
@@ -74,29 +71,39 @@ mementosRouter.post('/', function(req, res) {
     }
   };
 
+  //fetch the current user
   db.Users.query(makeQuery)
-  .fetch().then(function (recipients) {
-    db.Users.where({id : req.userID}).fetch().then(function (user) {
-      user.addNewMemento({
-        title : memento.title,
-        owner_id : req.userID,
-        public: memento.options.public,
-        release_type : 'default'
-      },recipients)
-      .then(function (mementoID) {
-        db.Moments.where({id : momentID}).fetch().then(function (moment) {
-          if(moment) {
-            moment.set('memento_id', mementoID).save().then(function () {
-            });
-          }
-          res.status(201).send(mementoID);
-        });
-      })
-      .catch(function (err) {
-        console.log('POST /api/1/mementos ERROR:', err);
-        res.status(500).send('error saving memento');
-      });
+  .fetch().then(function (r) {
+    recipients = r;
+    return db.Users.where({id : req.userID}).fetch();
+  })
+
+  //add the memento to the user
+  .then(function (u) {
+    user = u;
+
+    return user.addNewMemento({
+      title : memento.title,
+      owner_id : req.userID,
+      public: memento.options.public,
+      release_type : 'default'
+    }, recipients);
+  })
+
+  //add a moment, if any
+  .then(function (mementoID) {
+    db.Moments.where({id : momentID}).fetch().then(function (moment) {
+      if(moment) {
+        moment.set('memento_id', mementoID).save();
+      }
+      res.status(201).send(mementoID);
     });
+  })
+
+  //catch all errors
+  .catch(function (err) {
+    console.log('POST /api/1/mementos ERROR:', err);
+    res.status(500).send('error saving memento');
   });
 });
 
@@ -104,79 +111,100 @@ mementosRouter.post('/', function(req, res) {
 mementosRouter.get('/:id/:userType', function(req, res) {
   'use strict';
 
+  var userID = req.userID;
   var userType = req.params.userType;
   var mementoID = req.params.id;
   var memento;
+  var response;
 
-  db.Mementos.where({id : mementoID})
-  .fetch({withRelated : ['moments']}).then(function (fetchedMemento) {
+  var checkAuthorization = function checkAuthorization (cb, err) {
+    if(userType === 'author') {
+      memento.hasAuthor(userID)
+      .then(function (isAuthor) {
+        if(isAuthor) {
+          cb();
+        } else {
+          err();
+        }
+      });
+    }
+
+    if(userType === 'recipient') {
+      memento.hasRecipient(userID)
+      .then(function (isRecipient) {
+        if(isRecipient) {
+          cb();
+        } else {
+          err();
+        }
+      });
+    }
+  };
+
+  var attachMoment = function attachMoment (moment, done) {
+    var formattedMoment = moment.formatJSON();
+    formattedMoment.content = [];
+    var releaseDateValue = new Date(formattedMoment.releaseDate).valueOf();
+
+    if(userType === 'recipient' && releaseDateValue > Date.now().valueOf()) {
+      done(null, undefined);
+    } else {
+      moment.related('pebbles').fetch()
+      .then(function (pebbles) {
+        async.each(pebbles, function attachPebble (pebble, done) {
+          formattedMoment.content.push({
+            type : pebble.get('type'),
+            url : pebble.get('url'),
+            order : pebble.get('order')
+          });
+          done();
+        }, function resolveMoment () {
+          done(null, formattedMoment);
+        });
+      });
+    }
+  };
+
+  db.Mementos.where({id : mementoID}).fetch({withRelated : ['moments']})
+
+  .then(function (fetchedMemento) {
     memento = fetchedMemento;
-    console.log('memento', memento);
-    return new bPromise(function (resolve) {
-      var response = memento.formatJSON();
-      var unfinishedMoments = memento.related('moments').length;
-      response.moments = [];
+    response = memento.formatJSON();
+    response.moments = [];
 
-      if(memento.related('moments').length === 0) {
-        resolve(response);
-      } else {
-        memento.related('moments').forEach(function (moment) {
-          var formattedMoment = moment.formatJSON();
-          var releaseDateValue = new Date(formattedMoment.releaseDate).valueOf();
-          if(userType === 'author' || (userType === 'recipient' && releaseDateValue <= Date.now().valueOf())) {
-            formattedMoment.content = [];
-            moment.related('pebbles').fetch()
-            .then(function (pebbles) {
-              pebbles.forEach(function (pebble) {
-                formattedMoment.content.push({
-                  type : pebble.get('type'),
-                  url : pebble.get('url'),
-                  order : pebble.get('order')
-                });
-              });
+    checkAuthorization(
 
-              response.moments.push(formattedMoment);
-              unfinishedMoments--;
-              if(unfinishedMoments === 0) {
-                resolve(response);
+      function isAuthorized() {
+
+        if(memento.related('moments').length !== 0) {
+          async.map(memento.related('moments'), attachMoment, function (err, moments) {
+            var index;
+            for(index = 0; index < moments.length; index++) {
+              if(moments[index]) {
+                response.moments.push(moments[index]);
               }
-            });
-          } else {
-            unfinishedMoments--;
-            if(unfinishedMoments === 0) {
-              resolve(response);
             }
-          }
-        });
-      }
-    });
-  })
 
-  .then(function (response) {
-    console.log('returning ', response);
-    memento.hasAuthor(req.userID)
-    .then(function (isAuthor) {
-      if(isAuthor) {
-        res.status(200).send(response);
-      } else {
-        memento.hasRecipient(req.userID)
-        .then(function (isRecipient) {
-          if(isRecipient) {
+            console.log('GET /api/1/mementos/:id/:userType RESPONSE');
+            console.log('memento_response', response);
             res.status(200).send(response);
-          }else {
-            res.status(403).send('Unauthorized access of Memento');
-          }
-        });
+          });
+        }
+      },
+
+      function notAuthorized () {
+        res.status(403).send('Unauthorized access of Memento');
       }
-    });
+    );
+
   })
 
   .catch(function (err) {
     console.log('GET /api/1/mementos/:id/:userType', err);
     res.status(500).send('Failed to access Memento');
   });
-});
 
+});
 
 // update a memento with a moment
 mementosRouter.put('/:id', function(req, res) {
@@ -185,37 +213,40 @@ mementosRouter.put('/:id', function(req, res) {
   var mementoID = req.params.id;
   var momentID = req.body.momentID;
 
-  db.Mementos.where({id : mementoID})
-  .fetch().then(function (memento) {
-    memento.hasAuthor(req.userID).then(function (isAuthor){
-      if(isAuthor) {
-        db.Moments.where({id: momentID})
-        .fetch().then(function (moment) {
-          // moment not found with the momentID
-          if (moment === null) {
-            res.status(404).send('No moment found with that moment ID');
-          } else {
-            moment.set('memento_id', mementoID);
-            moment.save()
-            .then(function () {
-              res.status(201).send('save successful');
-            });
-          }
-        })
-        .catch(function (err) {
-          console.log('PUT /api/1/mementos/:id ERROR1:', err);
-          res.status(500).send('error adding moment to memento.');
-        });
-      } else {
-        res.status(403).send('Unauthorized request');
-      }
-    })
-    .catch(function (err) {
-      console.log('PUT /api/1/mementos/:id ERROR2:', err);
-      res.status(500).send('error adding moment to memento.');
-    });
+  db.Mementos.where({id : mementoID}).fetch()
+
+  .then(function (memento) {
+    return memento.hasAuthor(req.userID);
+  })
+
+  .then(function (isAuthor){
+    if(isAuthor) {
+      db.Moments.where({id: momentID})
+      .fetch().then(function (moment) {
+        // moment not found with the momentID
+        if (moment === null) {
+          res.status(400).send('No moment found with that moment ID');
+        } else {
+          moment.set('memento_id', mementoID);
+          moment.save()
+          .then(function () {
+            res.status(201).send('save successful');
+          });
+        }
+      })
+      .catch(function (err) {
+        console.log('PUT /api/1/mementos/:id ERROR1:', err);
+        res.status(500).send('error adding moment to memento.');
+      });
+    } else {
+      res.status(403).send('Unauthorized request');
+    }
+  })
+
+  .catch(function (err) {
+    console.log('PUT /api/1/mementos/:id ERROR2:', err);
+    res.status(500).send('error adding moment to memento.');
   });
 });
-
 
 module.exports = mementosRouter;
