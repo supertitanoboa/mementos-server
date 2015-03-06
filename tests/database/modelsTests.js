@@ -3,6 +3,7 @@ var assert = chai.assert;
 var expect = chai.expect;
 var async = require('async');
 var sinon = require('sinon');
+var bcrypt = require('bcrypt');
 
 var dbPath = '../../server/database';
 var db = require(dbPath);
@@ -58,7 +59,7 @@ describe('Models Tests', function () {
           done();
         });
       });
-    });
+    }); //users Schema End
 
     describe('"mementos" Schema', function () {
       var tableName = 'mementos';
@@ -118,7 +119,7 @@ describe('Models Tests', function () {
           done();
         });
       });
-    });
+    }); //mementos Schema End
 
     describe('"mementos_authors" Schema', function () {
       var tableName = 'mementos_authors';
@@ -143,7 +144,7 @@ describe('Models Tests', function () {
           done();
         });
       });
-    });
+    }); //mementos_authors Schema End
 
     describe('"mementos_recipients" Schema', function () {
       var tableName = 'mementos_recipients';
@@ -168,7 +169,7 @@ describe('Models Tests', function () {
           done();
         });
       });
-    });
+    }); //mementos_recipients Schema End
 
     describe('"moments" Schema', function () {
       var tableName = 'moments';
@@ -256,7 +257,7 @@ describe('Models Tests', function () {
           done();
         });
       });
-    });
+    }); //moments Schema End
 
     describe('"pebbles" Schema', function () {
       var tableName = 'pebbles';
@@ -316,17 +317,360 @@ describe('Models Tests', function () {
           done();
         });
       });
-    });
+    }); //pebbles Schema End
 
-  });
+  }); //Schema End
 
   describe('Models', function () {
 
-    describe('"Users" Model', function () {
-      it('should create a user', function () {
+    var Users = db.Users;
+    var Mementos = db.Mementos;
+    var Moments = db.Moments;
 
+    var user1;
+    var user2;
+    var memento1;
+    var memento2;
+
+    after(function (done) {
+      Mementos.where({
+        title : 'My Memento'
+      }).destroy()
+
+      .then(function () {
+        return Mementos.where({
+          title : 'My Second Memento'
+        }).destroy();
+      })
+
+      .then(function () {
+        return Users.where({
+          email: 'user1@test.com'
+        }).destroy();
+      })
+
+      .then(function () {
+        return Users.where({
+          email: 'user2@test.com'
+        }).destroy();
+      })
+
+      .then(function () {
+        done();
       });
     });
-  });
+
+    describe('"Users" Models', function () {
+
+      before(function (done) {
+        user2 = new Users({
+          email: 'user2@test.com'
+        });
+        user2.setPass('12345').then(function () {
+          return user2.save();
+        })
+        .then(function () {
+          done();
+        });
+      });
+
+      it('should create a new user', function (done) {
+        user1 = new Users({
+          email: 'user1@test.com'
+        });
+        user1.setPass('12345').then(function () {
+          return user1.save();
+        })
+        .then(function (user) {
+          user1 = user;
+
+          var id = parseInt(user.get('id'));
+
+          assert.isNumber(id, 'returned user id is not a number');
+
+          knex.raw('select * from "users" where id = ?', [id]).then(function (resp) {
+            expect(resp.rows.length).to.be.equal(1);
+            expect(resp.rows[0].email).to.equal('user1@test.com');
+            expect(bcrypt.compareSync('12345', resp.rows[0].password)).to.equal(true);
+            done();
+          });
+        });
+      }); //new user End
+
+      describe('validatePass', function () {
+
+        it('should return false when given no password', function () {
+          assert.isFalse(user1.validatePass(), 'accepting no password as valid.');
+          assert.isFalse(user1.validatePass(null), 'accepting null password as valid.');
+        });
+
+        it('should return true when given an invalid password', function () {
+          assert.isFalse(user1.validatePass('123456'), 'accepting invalid password as valid.');
+        });
+
+        it('should return true when given a valid password', function () {
+          assert.isTrue(user1.validatePass('12345'), 'rejecting valid password as invalid.');
+        });
+
+      }); //validatePass End
+
+      describe('changeEmail', function () {
+
+        it('should change the user email successfully', function (done) {
+          var oldEmail = user1.get('email');
+          var newEmail = 'temp2@test.com';
+          user1.changeEmail(newEmail)
+
+          .then(function() {
+            return knex.raw('select * from "users" where id = ?', [user1.attributes.id]);
+          })
+
+          .then(function (resp) {
+            expect(resp.rows.length).to.be.equal(1);
+            expect(resp.rows[0].email).to.equal('temp2@test.com');
+          })
+
+          .then(function () {
+            knex.raw('select * from "users" where email = ?', [oldEmail]).then(function (resp) {
+              expect(resp.rows.length).to.equal(0);
+
+              //clean up. set email back to old email
+              user1.changeEmail(oldEmail)
+              .then(function() {
+                done();
+              });
+            });
+          });
+
+        });
+
+      }); //changeEmail End
+
+    }); //Users Models End
+
+    describe('"Mementos" Model', function () {
+
+      it('should create a new memento', function (done) {
+        memento1 = new Mementos({
+          title: 'My Memento',
+          owner_id: user1.get('id')
+        }).save()
+        .then(function (memento) {
+          memento1 = memento;
+          var id = parseInt(memento.get('id'));
+
+          assert.isNumber(id, 'returned user id is not a number');
+
+          knex.raw('select * from "mementos" where id = ?', [id]).then(function (resp) {
+            expect(resp.rows.length).to.equal(1);
+            expect(resp.rows[0].title).to.equal('My Memento');
+            expect(resp.rows[0].owner_id).to.equal(user1.get('id'));
+            done();
+          });
+        });
+      }); //new memento End
+
+      describe('changeOwner', function () {
+
+        it('should transfer the ownership successfully', function (done) {
+          memento1.changeOwner(user2);
+          memento1.save().then(function () {
+            knex.raw('select * from "mementos" where id = ?', [memento1.get('id')]).then(function (resp) {
+              expect(resp.rows.length).to.equal(1);
+              expect(resp.rows[0].title).to.equal('My Memento');
+              expect(resp.rows[0].owner_id).to.equal(user2.get('id'));
+
+              memento1.changeOwner(user1);
+              memento1.save().then(function () {
+                done();
+              });
+            });
+          });
+        });
+      }); //changeOwner End
+
+      describe('Mementos Authors', function () {
+
+        it('should be able to add an author to a memento', function (done) {
+          memento1.addAuthors(user1)
+          .then(function () {
+            knex.raw('select * from "mementos_authors" where memento_id = ? and author_id = ?', [memento1.get('id'), user1.get('id')])
+            .then(function (resp) {
+              expect(resp.rows.length).to.equal(1);
+              done();
+            });
+          });
+        });
+
+        it('should be able to check an author is part of a memento', function (done) {
+          memento1.hasAuthor(user1.get('id'))
+          .then(function (isAuthor) {
+            expect(isAuthor).to.equal(true);
+            done();
+          });
+        });
+
+        it('should be able to check an author is not part of a memento', function (done) {
+          memento1.hasAuthor(user2.get('id'))
+          .then(function (isAuthor) {
+            expect(isAuthor).to.equal(false);
+            done();
+          });
+        });
+
+        it('should successfully retrieve the list of authors', function (done) {
+          memento1.addAuthors(user2)
+          .then(function () {
+            return memento1.getAuthors();
+          })
+          .then(function (authors) {
+            var correctAuthors = false;
+
+            if(
+              (authors.models[0].get('id') === user1.get('id') && authors.models[1].get('id') === user2.get('id'))
+              ||
+              (authors.models[1].get('id') === user1.get('id') && authors.models[0].get('id') === user2.get('id'))
+            ) {
+              correctAuthors = true;
+            }
+
+            expect(authors.length).to.equal(2);
+            expect(correctAuthors).to.equal(true);
+          })
+          .then(function () {
+            return memento1.removeAuthors(user2);
+          })
+          .then(function () {
+            done();
+          });
+        });
+
+        it('should be able to remove an author from a memento', function (done) {
+          memento1.removeAuthors([user1, user2])
+          .then(function () {
+            knex.raw('select * from "mementos_authors" where memento_id = ? and author_id = ?', [memento1.get('id'), user1.get('id')])
+            .then(function (resp) {
+              expect(resp.rows.length).to.equal(0);
+            })
+            .then(function () {
+              knex.raw('select * from "mementos_authors" where memento_id = ? and author_id = ?', [memento1.get('id'), user2.get('id')])
+              .then(function (resp) {
+                expect(resp.rows.length).to.equal(0);
+                done();
+              });
+            });
+
+          });
+        });
+
+      }); //Mementos Authors End
+
+      describe('Mementos Recipients', function () {
+
+        it('should be able to add a recipient to a memento', function (done) {
+          memento1.addRecipients(user1)
+          .then(function () {
+            knex.raw('select * from "mementos_recipients" where memento_id = ? and recipient_id = ?', [memento1.get('id'), user1.get('id')])
+            .then(function (resp) {
+              expect(resp.rows.length).to.equal(1);
+              done();
+            });
+          });
+        });
+
+        it('should be able to check a recipient is part of a memento', function (done) {
+          memento1.hasRecipient(user1.get('id'))
+          .then(function (isRecipient) {
+            expect(isRecipient).to.equal(true);
+            done();
+          });
+        });
+
+        it('should be able to check a recipient is not part of a memento', function (done) {
+          memento1.hasRecipient(user2.get('id'))
+          .then(function (isRecipient) {
+            expect(isRecipient).to.equal(false);
+            done();
+          });
+        });
+
+        it('should successfully retrieve the list of recipient', function (done) {
+          memento1.addRecipients(user2)
+          .then(function () {
+            return memento1.getRecipients();
+          })
+          .then(function (recipients) {
+            var correctRecipients = false;
+
+            if(
+              (recipients.models[0].get('id') === user1.get('id') && recipients.models[1].get('id') === user2.get('id'))
+              ||
+              (recipients.models[1].get('id') === user1.get('id') && recipients.models[0].get('id') === user2.get('id'))
+            ) {
+              correctRecipients = true;
+            }
+
+            expect(recipients.length).to.equal(2);
+            expect(correctRecipients).to.equal(true);
+          })
+          .then(function () {
+            return memento1.removeRecipients(user2);
+          })
+          .then(function () {
+            done();
+          });
+        });
+
+        it('should be able to remove a recipient from a memento', function (done) {
+          memento1.removeRecipients([user1, user2])
+          .then(function () {
+            knex.raw('select * from "mementos_recipients" where memento_id = ? and recipient_id = ?', [memento1.get('id'), user1.get('id')])
+            .then(function (resp) {
+              expect(resp.rows.length).to.equal(0);
+            })
+            .then(function () {
+              knex.raw('select * from "mementos_recipients" where memento_id = ? and recipient_id = ?', [memento1.get('id'), user2.get('id')])
+              .then(function (resp) {
+                expect(resp.rows.length).to.equal(0);
+                done();
+              });
+            });
+
+          });
+        });
+
+      }); //Mementos Recipients End
+
+      describe('Users#addNewMemento method', function () {
+
+        it('should be able to be created through the User#addNewMemento method', function (done) {
+          user1.addNewMemento({
+            title: 'My Second Memento'
+          }, user2)
+          .then(function (mementoID) {
+            Mementos.where({id : mementoID}).fetch()
+            .then(function (memento) {
+              memento2 = memento;
+
+              knex.raw('select * from "mementos" where id = ? ', [mementoID])
+              .then(function (resp) {
+                expect(resp.rows.length).to.equal(1);
+                expect(resp.rows[0].title).to.equal('My Second Memento');
+                expect(resp.rows[0].owner_id).to.equal(user1.get('id'));
+
+                memento2.removeAuthors([user1]);
+                memento2.removeRecipients([user2]);
+
+                done();
+              });
+            });
+          });
+        });
+
+      });  //Users.addNewMemento End
+
+    }); //Mementos Model End
+
+  }); //Models End
 
 });

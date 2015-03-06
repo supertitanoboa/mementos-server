@@ -1,5 +1,6 @@
 var express = require('express');
 var aws = require('../../aws/aws.js');
+var momentjs = require('moment');
 var async = require('async');
 var momentsRouter = express.Router();
 var db;
@@ -15,7 +16,7 @@ momentsRouter.post('/', function(req, res) {
     title : req.body.title,
     author_id : req.userID,
     ordering : momentData.ordering,
-    release_date : Date(momentData.releaseDate).slice(0,31),
+    release_date : momentjs(momentData.releaseDate).format(),
     longitude : momentData.meta.location.longitude,
     latitude : momentData.meta.location.latitude,
     location : momentData.meta.location.place
