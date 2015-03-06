@@ -45,7 +45,7 @@ var retrieverConstructor = function (db) {
       });
     })
 
-    .then(function (momentsToBeReleased) {
+    .then(function () {
       notifyQueue.push(momentsToBeReleased);
 
       if(moment().utc().startOf('minute').valueOf() > thisMinute.valueOf()) {

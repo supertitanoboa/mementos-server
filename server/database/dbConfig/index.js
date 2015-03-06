@@ -5,7 +5,7 @@ var bookshelf = require('bookshelf')(knex);
 module.exports = {
   'bookshelf': bookshelf,
   'knex': knex,
-  'destroy': function(cb) {
+  'destroy': function() {
     'use strict';
     return knex.destroy();
   }

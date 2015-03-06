@@ -189,6 +189,10 @@ mementosRouter.get('/:id/:userType', function(req, res) {
             console.log('memento_response', response);
             res.status(200).send(response);
           });
+        } else {
+          console.log('GET /api/1/mementos/:id/:userType RESPONSE');
+          console.log('memento_response', response);
+          res.status(200).send(response);
         }
       },
 
