@@ -33,7 +33,7 @@ var modelsBuilder = function modelsBuilder (db) {
 
     changeEmail : function changeEmail(email) {
       if(require('valid-email')(email)) {
-        this.set('email', email);
+        return this.save({id: this.get('id'), email : email}, {method : 'update'});
       } else {
         throw new Error('Error: Invalid Email.');
       }
@@ -63,6 +63,9 @@ var modelsBuilder = function modelsBuilder (db) {
 
     addNewMemento : function addNewMemento (data, recipients) {
       var _this = this;
+
+      data.owner_id = _this.get('id');
+
       return new bPromise(function (resolve, reject) {
         new Mementos(data).save()
         .then(function (memento) {
