@@ -2,10 +2,6 @@ var AWS = require('aws-sdk');
 var express = require('express');
 var uuid = require('uuid');
 var aws = {};
-var objectId;
-var return_data;
-var s3_params;
-var s3;
 
 aws.s3Router = express.Router();
 
@@ -15,6 +11,12 @@ aws.S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
 
 aws.s3Router.get('*', function(req, res){
   'use strict';
+
+  var s3;
+  var s3_params;
+  var objectId;
+  var return_data;
+
   AWS.config.update({accessKeyId: aws.AWS_ACCESS_KEY_ID, secretAccessKey: aws.AWS_SECRET_ACCESS_KEY});
 
   objectId = uuid.v4();

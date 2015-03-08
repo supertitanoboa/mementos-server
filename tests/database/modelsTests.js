@@ -331,11 +331,18 @@ describe('Models Tests', function () {
     var user2;
     var memento1;
     var memento2;
+    var moment1;
 
     after(function (done) {
-      Mementos.where({
-        title : 'My Memento'
+      Moments.where({
+        title : 'My Moment'
       }).destroy()
+
+      .then(function () {
+        return Mementos.where({
+          title : 'My Memento'
+        }).destroy();
+      })
 
       .then(function () {
         return Mementos.where({
@@ -670,6 +677,43 @@ describe('Models Tests', function () {
       });  //Users.addNewMemento End
 
     }); //Mementos Model End
+
+    describe('Moments Model', function () {
+
+      it('should create a new moment', function (done) {
+        moment1 = new Moments({
+          title : 'My Moment',
+          author_id : user1.get('id'),
+          ordering : 1,
+          longitude : parseFloat(99.9999),
+          latitude : parseFloat(33.3333),
+          location : 'somewhere over the rainbow',
+          release_date : 'Sun, 14 Feb 2016 12:00:00 GMT'
+        }).save()
+        .then(function (moment) {
+          moment1 = moment;
+          var id = parseInt(moment.get('id'));
+
+          assert.isNumber(id, 'returned user id is not a number');
+
+          knex.raw('select * from "moments" where id = ?', [id]).then(function (resp) {
+            expect(resp.rows.length).to.equal(1);
+            expect(resp.rows[0].title).to.equal('My Moment');
+            expect(resp.rows[0].author_id).to.equal(user1.get('id'));
+            expect(resp.rows[0].ordering).to.equal(1);
+            expect(parseFloat(resp.rows[0].longitude)).to.equal(99.9999);
+            expect(parseFloat(resp.rows[0].latitude)).to.equal(33.3333);
+            expect(resp.rows[0].location).to.equal('somewhere over the rainbow');
+            console.log(typeof resp.rows[0].release_date);
+            expect(resp.rows[0].release_date.toUTCString()).to.equal('Sun, 14 Feb 2016 12:00:00 GMT');
+            done();
+          });
+        });
+      }); //new memento End
+
+      // it('should create')
+
+    }); //Moments Model End
 
   }); //Models End
 
