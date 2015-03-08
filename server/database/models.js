@@ -185,6 +185,21 @@ var modelsBuilder = function modelsBuilder (db) {
     },
 
     formatJSON : function formattedJSON() {
+      var authors = [];
+      var recipients = [];
+
+      if(this.related('authors')) {
+        this.related('authors').forEach(function (author) {
+          authors.push(author.get('email'));
+        });
+      }
+
+      if(this.related('recipients')) {
+        this.related('recipients').forEach(function (recipient) {
+          recipients.push(recipient.get('email'));
+        });
+      }
+
       return {
         ID : this.get('id'),
         title : this.get('title'),
@@ -192,7 +207,9 @@ var modelsBuilder = function modelsBuilder (db) {
         options : {
           public : this.get('public'),
           releaseType : this.get('release_type')
-        }
+        },
+        authors : authors,
+        recipients : recipients
       };
     }
 
@@ -229,11 +246,11 @@ var modelsBuilder = function modelsBuilder (db) {
       return addedPebble.save();
     },
 
-    removePebble : function removePebble(ordering) {
-      Pebbles.where({ordering : ordering}).fetch().then(function (pebble) {
-        pebble.destroy();
-      });
-    },
+    // removePebble : function removePebble(ordering) {
+    //   Pebbles.where({ordering : ordering}).fetch().then(function (pebble) {
+    //     pebble.destroy();
+    //   });
+    // },
 
     memento : function memento () {
       return this.belongsTo(Mementos, 'memento_id');

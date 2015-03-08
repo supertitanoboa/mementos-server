@@ -19,16 +19,16 @@ mementosRouter.get('/', function(req, res) {
     received : received
   };
 
-  var checkReceivedMementos = function checkReceivedMementos (memento, done) {
-    memento.fetch({withRelated: ['moments']})
-    .then(function checkMoments(memento2) {
+  var formatReceivedMementos = function formatReceivedMementos (memento, done) {
+    memento.fetch({withRelated: ['moments', 'authors', 'recipients']})
+    .then(function addMemento(memento2) {
       var moments = memento2.related('moments');
       var added = false;
 
       if(moments) {
         moments.forEach(function compareMomentReleaseDate(moment) {
           if(!added && moment.get('release_date').valueOf() <= Date.now().valueOf()) {
-            received.push(memento.formatJSON());
+            received.push(memento2.formatJSON());
             added = true;
           }
         });
@@ -38,14 +38,33 @@ mementosRouter.get('/', function(req, res) {
     });
   };
 
+  var formatAuthoredMementos = function formatAuthoredMementos (memento, done) {
+    memento.fetch({withRelated: ['moments', 'authors', 'recipients']})
+    .then(function addMemento(memento2) {
+      authored.push(memento2.formatJSON());
+      done();
+    });
+  };
+
   db.Users.where({id : req.userID})
   .fetch({withRelated : ['mementosAuthored', 'mementosReceived']})
   .then(function (user) {
-    async.each(user.related('mementosReceived'), checkReceivedMementos, function sendResponse() {
-      user.related('mementosAuthored').forEach(function (memento) {
-        authored.push(memento.formatJSON());
-      });
-
+    async.parallel([
+      function addReceivedMementos(done) {
+        async.each(user.related('mementosReceived'), formatReceivedMementos,
+          function sendResponse() {
+            done();
+          }
+        );
+      },
+      function addAuthored(done) {
+        async.each(user.related('mementosAuthored'), formatAuthoredMementos,
+          function sendResponse() {
+            done();
+        });
+      }
+    ],
+    function () {
       res.status(200).send(mementos);
     });
   })
