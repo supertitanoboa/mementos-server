@@ -40,3 +40,5 @@ dump.rdb
 # Credentials for S3
 credentials.js
 
+#public assets
+server/public/assets/img/screens

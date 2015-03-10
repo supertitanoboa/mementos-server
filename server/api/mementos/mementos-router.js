@@ -170,14 +170,16 @@ mementosRouter.get('/:id/:userType', function(req, res) {
     } else {
       moment.related('pebbles').fetch()
       .then(function (pebbles) {
+        formattedMoment.content = new Array(pebbles.length);
         async.each(pebbles, function attachPebble (pebble, done) {
-          formattedMoment.content.push({
+          formattedMoment.content[pebble.get('ordering') - 1] = {
             type : pebble.get('type'),
             url : pebble.get('url'),
-            order : pebble.get('order')
-          });
+            ordering : pebble.get('ordering')
+          };
           done();
         }, function resolveMoment () {
+          console.log(formattedMoment.content);
           done(null, formattedMoment);
         });
       });

@@ -1,0 +1,231 @@
+
+/*
+                    HEX     RGB
+  darkest blue    : 3E505F  62,80,95
+  teal            : 3B6979  59,105,121
+  dark purple     : 8E6979  142,105,121
+  maroon-ish      : B06966  176,105,102
+  orange-ish      : FF8466  255,132,102
+*/
+
+/* Roboto thin */
+@font-face {
+  font-family: RobotoThin;
+  src: url("../fonts/roboto/Roboto-Thin.ttf") format("truetype");
+}
+
+/* Roboto light */
+@font-face {
+  font-family: RobotoLight;
+  src: url("../fonts/roboto/Roboto-Light.ttf") format("truetype");
+}
+
+/* Existence Light */
+@font-face {
+  font-family: Existence;
+  src: url('../fonts/Existence-Light/web/existence_light_macroman/Existence-Light-webfont.eot') format('embedded-opentype'),
+   url('../fonts/Existence-Light/web/existence_light_macroman/Existence-Light-webfont.woff') format('woff'),
+   url('../fonts/Existence-Light/web/existence_light_macroman/Existence-Light-webfont.ttf')  format('truetype'),
+   url('../fonts/Existence-Light/web/existence_light_macroman/Existence-Light-webfont.svg') format('svg');
+}
+
+@font-face {
+  font-family: ReklameScript;
+  src: url('../fonts/ReklameScript.otf');
+}
+
+.pure-g > div {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+html {
+  background-image : url(../img/mementos.jpg);
+
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-color: #000;
+}
+
+body {
+  min-height : 100%;
+  background-color : rgba(255, 200, 180, 0.1);
+}
+
+/* Headers + Nav */
+
+header {
+  color : white;
+  padding : 2px 0 2px 10px;
+  display: inline;
+  position : absolute;
+}
+
+header * {
+  line-height: 1.5em;
+  display : inline-block;
+}
+
+header h1.title {
+  margin: 0 10px;
+}
+
+header ul.nav li {
+  display: inline-block;
+}
+
+header ul.nav li a {
+  text-decoration : none;
+  color : white;
+  text-shadow : 0 0 2px black;
+  margin : 0 5px;
+  font-size: 1.3em;
+  font-family: 'Existence';
+}
+
+header ul.nav li a:hover {
+  color : #FF8466;
+}
+
+header h1.title {
+  font-size: 36px;
+  font-family: 'ReklameScript';
+  text-shadow: 0 0 2px black;
+  display : inline-block;
+}
+
+footer {
+  background-color : rgba(62,80,95, 1);
+  color : white;
+  padding : 10px 10px;
+  font-size: 10px;
+  text-align : right;
+}
+
+/* Marketing Sections */
+
+.marketing > div {
+  height : 100vh;
+}
+
+/* First Section: Slogan */
+
+.marketing .slogan {
+  color : white;
+  font-size: 2em;
+  text-align: center;
+}
+
+.marketing .slogan p {
+  text-shadow: 0 0 10px black;
+  font-family : 'Existence';
+  margin-top : 20px;
+}
+
+.marketing .slogan h1.title {
+  font-size: 3.2em;
+  font-family: 'ReklameScript';
+  /*color : white;*/
+  text-shadow: 0 0 20px black;
+  text-align: center;
+  padding-top : 20vh;
+}
+
+.marketing .description {
+  position : relative;
+  height : 100%;
+  background-color: rgba(255,255,255,.7);
+  padding-top : 40px;
+}
+
+.marketing .description .content {
+  box-sizing : border-box;
+  padding : 50px;
+  height: 100%;
+  vertical-align: center;
+}
+
+.marketing .description .content h2 {
+  font-size: 3.2em;
+  margin-bottom: 50px;
+  font-family : 'Oswald';
+}
+
+.marketing .description .content p {
+  font-size: 1.5em;
+  margin : 20px 0;
+  font-family: 'RobotoThin';
+}
+
+.marketing .iphone {
+  position : relative;
+}
+
+.iphone img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Team Members */
+
+.team {
+  background-color : white;
+  padding : 20px 50px;
+}
+
+.team h1.title {
+  font-family : 'Oswald', 'ReklameScript';
+  font-size: 3.8em;
+  text-align: center;
+  margin: 0 0 25px ;
+}
+
+.member {
+  text-align : center;
+  box-sizing : border-box;
+  padding : 10px;
+}
+
+.member .profile {
+  box-sizing: border-box;
+  padding: 10px;
+  line-height: 1.5em;
+  border-bottom: 7px solid black;
+  border-radius : 2px;
+  font-family: 'RobotoLight';
+}
+
+.member .profilepic img {
+  border: 1px solid #8E6979;
+  box-shadow : 0 0px 1px 1px rgba(0,0,0,.2);
+}
+
+.profile .name {
+  font-size: 1.7em;
+  line-height: 1.1em;
+  font-family: 'RobotoThin';
+}
+
+.profile .role {
+  font-style : italic;
+  font-size: .9em;
+}
+
+.profile .links li {
+  display : inline-block;
+}
+
+.profile .fa {
+  text-decoration : none;
+  color: black;
+  font-size: 1.3em;
+  margin: 0 13px;
+}
+
+.profile .fa:hover {
+  color : #FF8466;
+}
