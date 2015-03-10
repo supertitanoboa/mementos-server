@@ -334,9 +334,14 @@ describe('Models Tests', function () {
     var moment1;
 
     after(function (done) {
-      Moments.where({
-        title : 'My Moment'
-      }).destroy()
+
+      knex.raw('delete from "pebbles"')
+
+      .then(function () {
+        Moments.where({
+          title : 'My Moment'
+        }).destroy();
+      })
 
       .then(function () {
         return Mementos.where({
@@ -711,7 +716,26 @@ describe('Models Tests', function () {
         });
       }); //new memento End
 
-      // it('should create')
+      describe('Pebbles', function () {
+
+        it('should create the pebbles that have been passed to it through Moment#addPebble', function (done) {
+          var pebbleData = {
+            type : 'plain/text',
+            url : 'http://www.test.com',
+            ordering: 1
+          };
+
+          moment1.addPebble(pebbleData.type, pebbleData.url, pebbleData.ordering)
+          .then(function () {
+            knex.raw('select * from "pebbles" where moment_id = ?', [moment1.get('id')])
+            .then(function (resp) {
+              expect(resp.rows.length).to.equal(1);
+              done();
+            });
+          });
+        }); //Moment#addPebble End
+
+      }); //Pebbles Schema End
 
     }); //Moments Model End
 

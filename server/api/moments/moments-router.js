@@ -12,6 +12,8 @@ momentsRouter.post('/', function(req, res) {
   var pebbles = momentData.content;
   db = req.db;
 
+  console.log('POST pebbles', pebbles);
+
   new db.Moments({
     title : req.body.title,
     author_id : req.userID,

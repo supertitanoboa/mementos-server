@@ -14,17 +14,17 @@ describe('Server Unit Tests', function() {
     expect(port).to.be.a('number');
     assert.typeOf(port, 'number');
   });
-
-  describe('GET /', function(){
-    it('respond with plain text and 200 status code', function(done){
-      supertest(app)
-        .get('/')
-        .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect('ETag', '12345')
-        .expect(200)
-        .expect('Hello Alan!', done);
-    });
-  });
+  //
+  // describe('GET /', function(){
+  //   it('respond with plain text and 200 status code', function(done){
+  //     supertest(app)
+  //       .get('/')
+  //       .expect('Content-Type', 'text/plain; charset=utf-8')
+  //       .expect('ETag', '12345')
+  //       .expect(200)
+  //       .expect('Hello Alan!', done);
+  //   });
+  // });
 
   describe('GET /mementos without session authentication', function(){
     it('respond with 403 status code', function(done){
@@ -103,20 +103,6 @@ describe('Server Unit Tests', function() {
       supertest(app)
         .get('/auth/logout')
         .expect(302, done);
-    });
-  });
-
-  describe('Redis Sessions', function(){
-    it('res.cookies should contain a sessionID', function(done){
-      supertest(app)
-        .get('/')
-        .expect('Set-Cookie', /sessionID/ , done);
-    });
-
-    it('res.cookies should contain a connect.sid', function(done){
-      supertest(app)
-        .get('/')
-        .expect('Set-Cookie', /connect.sid/ , done);
     });
   });
 

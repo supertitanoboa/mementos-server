@@ -15,6 +15,9 @@ console.log('process.pid', process.pid);
 app.set('db', db);
 app.set('redis', redis);
 app.set('port', process.env.PORT || 3000);
+
+app.use(express.static(__dirname + '/public'));
+
 app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use(cookieParser());
