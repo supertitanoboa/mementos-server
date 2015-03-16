@@ -13,6 +13,10 @@ var knex = bookshelf.knex;
 describe('Models Tests', function () {
   'use strict';
 
+  before(function(done) {
+    setTimeout(done, 500);
+  });
+
   describe('Schema', function () {
 
     describe('"users" Schema', function () {
